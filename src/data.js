@@ -138,3 +138,32 @@ export const depoimentos = []
 // Ex.: { tipo: 'foto', src: 'midia/caixa.jpg', alt: 'Caixa aberta com as 12 bombinhas' }
 //      { tipo: 'video', src: 'midia/efervescendo.mp4', alt: 'Bombinha efervescendo na banheira' }
 export const midia = []
+
+// Vídeos reais do produto, sem áudio, em public/midia/. Cada um aparece numa seção.
+export const videos = {
+  hero: {
+    src: 'midia/banheira-arco-iris.mp4',
+    poster: 'midia/banheira-arco-iris.jpg',
+    descricao: 'Bombinha efervescendo na banheira: a água vira um redemoinho de arco-íris e uma tartaruguinha aparece no meio da espuma.',
+  },
+  caixa: {
+    src: 'midia/caixa-aberta.mp4',
+    poster: 'midia/caixa-aberta.jpg',
+    descricao: 'Caixa sendo aberta, com 12 bombinhas coloridas, cada uma no seu lugar.',
+  },
+  passos: {
+    src: 'midia/bombinha-rosa.mp4',
+    poster: 'midia/bombinha-rosa.jpg',
+    descricao: 'Bombinha rosa efervescendo na água até soltar o bichinho, que vai para a coleção.',
+  },
+  banho: {
+    src: 'midia/banheira-tartaruga.mp4',
+    poster: 'midia/banheira-tartaruga.jpg',
+    descricao: 'Bebê sorrindo na banheira enquanto a espuma colorida se espalha e uma tartaruguinha aparece.',
+  },
+  final: {
+    src: 'midia/espuma-polvo.mp4',
+    poster: 'midia/espuma-polvo.jpg',
+    descricao: 'Bombinha de arco-íris efervescendo e espalhando uma espuma colorida pela água.',
+  },
+}

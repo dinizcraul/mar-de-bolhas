@@ -5,6 +5,7 @@ import FizzTub from './components/FizzTub'
 import BathBomb from './components/BathBomb'
 import SeaToy from './components/SeaToy'
 import Oferta from './components/Oferta'
+import VideoProduto from './components/VideoProduto'
 import {
   marca,
   kits,
@@ -17,6 +18,7 @@ import {
   perguntas,
   depoimentos,
   midia,
+  videos,
 } from './data'
 import { brl } from './compra'
 
@@ -56,7 +58,11 @@ function Hero() {
             bombas efervescentes por caixa, cada uma com um brinquedo diferente.
           </p>
         </div>
-        <FizzTub />
+        <div className="hero-midia">
+          <VideoProduto video={videos.hero} primeiro />
+          <BathBomb cor="#FFD45C" className="hero-deco hero-deco-bomba" />
+          <SeaToy id="polvo" className="hero-deco hero-deco-bicho" />
+        </div>
         <div className="hero-extra">
           <div className="hero-acoes">
             <a className="botao botao-coral" href="#kits">
@@ -88,19 +94,7 @@ function NaCaixa() {
   return (
     <section className="secao azulejo" aria-labelledby="caixa-titulo">
       <div className="envelope duas-colunas">
-        <div className="caixa" aria-hidden="true">
-          <div className="caixa-tampa">
-            <span>{marca.nome}</span>
-            <span>12 bombinhas · tema A</span>
-          </div>
-          <div className="caixa-grade">
-            {Array.from({ length: 12 }, (_, i) => (
-              <div className="caixa-nicho" key={i}>
-                {i === 6 ? <SeaToy id="polvo" className="caixa-bicho" /> : <BathBomb cor={coresBomba[i % coresBomba.length]} />}
-              </div>
-            ))}
-          </div>
-        </div>
+        <VideoProduto video={videos.caixa} className="caixa-video" />
         <div className="caixa-texto">
           <p className="sobretitulo">O que vem na caixa</p>
           <h2 id="caixa-titulo">Doze banhos, doze surpresas</h2>
@@ -126,22 +120,42 @@ function NaCaixa() {
 function ComoFunciona() {
   return (
     <section className="secao azulejo secao-colada" id="como-funciona" aria-labelledby="passos-titulo">
-      <div className="envelope">
-        <header className="secao-cabeca">
-          <p className="sobretitulo">Como funciona</p>
-          <h2 id="passos-titulo">Do pacote ao bichinho em quatro passos</h2>
-        </header>
-        <ol className="passos">
-          {passos.map((p, i) => (
-            <li key={p.titulo} className="passo">
-              <span className="passo-numero" style={{ '--cor': coresBomba[i] }}>
-                {i + 1}
-              </span>
-              <h3>{p.titulo}</h3>
-              <p>{p.texto}</p>
-            </li>
-          ))}
-        </ol>
+      <div className="envelope duas-colunas passos-grade">
+        <div className="passos-texto">
+          <header className="secao-cabeca">
+            <p className="sobretitulo">Como funciona</p>
+            <h2 id="passos-titulo">Do pacote ao bichinho em quatro passos</h2>
+          </header>
+          <ol className="passos">
+            {passos.map((p, i) => (
+              <li key={p.titulo} className="passo">
+                <span className="passo-numero" style={{ '--cor': coresBomba[i] }}>
+                  {i + 1}
+                </span>
+                <h3>{p.titulo}</h3>
+                <p>{p.texto}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+        <VideoProduto video={videos.passos} className="passos-video" />
+      </div>
+    </section>
+  )
+}
+
+function Experimente() {
+  return (
+    <section className="secao azulejo secao-colada" id="experimente" aria-labelledby="experimente-titulo">
+      <div className="envelope duas-colunas">
+        <div className="experimente-texto">
+          <p className="sobretitulo">Experimente</p>
+          <h2 id="experimente-titulo">Solte uma bombinha aqui mesmo</h2>
+          <p className="secao-intro">
+            Toque no botão e veja qual bichinho aparece na banheira. São 12 para achar, um para cada bombinha da caixa.
+          </p>
+        </div>
+        <FizzTub />
       </div>
     </section>
   )
@@ -199,23 +213,26 @@ function Bichinhos() {
 function Beneficios() {
   return (
     <section className="secao azulejo" aria-labelledby="beneficios-titulo">
-      <div className="envelope">
-        <header className="secao-cabeca">
-          <p className="sobretitulo">Para os pais</p>
-          <h2 id="beneficios-titulo">Por que o banho fica mais fácil</h2>
-        </header>
-        <ul className="beneficios">
-          {beneficios.map((b) => {
-            const Icone = icones[b.icone]
-            return (
-              <li key={b.titulo} className="beneficio">
-                <Icone size={26} aria-hidden="true" />
-                <h3>{b.titulo}</h3>
-                <p>{b.texto}</p>
-              </li>
-            )
-          })}
-        </ul>
+      <div className="envelope beneficios-grade">
+        <VideoProduto video={videos.banho} className="beneficios-video" />
+        <div className="beneficios-texto">
+          <header className="secao-cabeca">
+            <p className="sobretitulo">Para os pais</p>
+            <h2 id="beneficios-titulo">Por que o banho fica mais fácil</h2>
+          </header>
+          <ul className="beneficios">
+            {beneficios.map((b) => {
+              const Icone = icones[b.icone]
+              return (
+                <li key={b.titulo} className="beneficio">
+                  <Icone size={26} aria-hidden="true" />
+                  <h3>{b.titulo}</h3>
+                  <p>{b.texto}</p>
+                </li>
+              )
+            })}
+          </ul>
+        </div>
       </div>
     </section>
   )
@@ -296,21 +313,24 @@ function Final() {
   return (
     <section className="secao mar final" aria-labelledby="final-titulo">
       <div className="envelope final-conteudo">
-        <div className="final-bichos" aria-hidden="true">
-          {['tartaruga', 'baiacu', 'golfinho'].map((id) => (
-            <SeaToy key={id} id={id} />
-          ))}
+        <VideoProduto video={videos.final} className="final-video" />
+        <div className="final-texto">
+          <div className="final-bichos" aria-hidden="true">
+            {['tartaruga', 'baiacu', 'golfinho'].map((id) => (
+              <SeaToy key={id} id={id} />
+            ))}
+          </div>
+          <h2 id="final-titulo">O próximo banho já pode ter surpresa</h2>
+          <p className="secao-intro">Caixa com 12 bombinhas a partir de {aPartirDe}.</p>
+          <a className="botao botao-coral" href="#kits">
+            Escolher meu kit <ArrowRight size={18} aria-hidden="true" />
+          </a>
         </div>
-        <h2 id="final-titulo">O próximo banho já pode ter surpresa</h2>
-        <p className="secao-intro">Caixa com 12 bombinhas a partir de {aPartirDe}.</p>
-        <a className="botao botao-coral" href="#kits">
-          Escolher meu kit <ArrowRight size={18} aria-hidden="true" />
-        </a>
       </div>
       <footer className="envelope rodape">
         <Logo />
         <p>
-          Imagens ilustrativas. Indicado a partir de 3 anos, com um adulto por perto. © {new Date().getFullYear()}{' '}
+          Os desenhos são ilustrativos e os vídeos mostram o produto. Indicado a partir de 3 anos, com um adulto por perto. © {new Date().getFullYear()}{' '}
           {marca.nome}.
         </p>
       </footer>
@@ -354,6 +374,7 @@ export default function App() {
         <Hero />
         <NaCaixa />
         <ComoFunciona />
+        <Experimente />
         <Galeria />
         <Bichinhos />
         <Beneficios />

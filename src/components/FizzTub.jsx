@@ -4,23 +4,12 @@ import BathBomb from './BathBomb'
 import SeaToy from './SeaToy'
 import { criarMotor } from './fizzEngine'
 import { bichinhos, coresBomba } from '../data'
+import { useMovimentoReduzido } from '../hooks'
 
 const ANTES_MS = 280
 const QUEDA_MS = 620
 const FIZZ_MS = 3400
-const AUTO_MS = 1300
-
-function useMovimentoReduzido() {
-  const consulta = '(prefers-reduced-motion: reduce)'
-  const [reduzido, setReduzido] = useState(() => window.matchMedia(consulta).matches)
-  useEffect(() => {
-    const mq = window.matchMedia(consulta)
-    const mudar = () => setReduzido(mq.matches)
-    mq.addEventListener('change', mudar)
-    return () => mq.removeEventListener('change', mudar)
-  }, [])
-  return reduzido
-}
+const AUTO_MS = 500
 
 export default function FizzTub() {
   const [fase, setFase] = useState('pronta')
@@ -132,15 +121,31 @@ export default function FizzTub() {
     agendar(revelar, t0 + QUEDA_MS + FIZZ_MS)
   }, [fase, achados, cor, reduzido])
 
-  // Uma demonstração automática quando a página abre
+  const jogarRef = useRef(jogar)
+  useEffect(() => {
+    jogarRef.current = jogar
+  })
+
+  // Uma demonstração automática na primeira vez que a banheira aparece na tela
   useEffect(() => {
     if (reduzido) return
-    const t = setTimeout(() => {
-      if (!jaJogou.current) jogar()
-    }, AUTO_MS)
-    return () => clearTimeout(t)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+    let t
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (!e.isIntersecting || jaJogou.current) return
+        io.disconnect()
+        t = setTimeout(() => {
+          if (!jaJogou.current) jogarRef.current()
+        }, AUTO_MS)
+      },
+      { threshold: 0.6 },
+    )
+    io.observe(cenaRef.current)
+    return () => {
+      io.disconnect()
+      clearTimeout(t)
+    }
+  }, [reduzido])
 
   const completo = achados.length >= bichinhos.length
 

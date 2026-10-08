@@ -23,7 +23,6 @@
   --agua-1: #a6e6e8;
   --agua-2: #57bcc8;
   --caixa: #0e6f7a;
-  --caixa-nicho: #0a5560;
   --sombra: rgba(8, 40, 46, 0.28);
 
   /* cores das bombinhas: iguais nos dois temas */
@@ -63,7 +62,6 @@
     --agua-1: #3fa6b3;
     --agua-2: #1c6976;
     --caixa: #13707b;
-    --caixa-nicho: #0b4e57;
     --sombra: rgba(0, 0, 0, 0.5);
     color-scheme: dark;
   }
@@ -92,7 +90,6 @@
   --agua-1: #3fa6b3;
   --agua-2: #1c6976;
   --caixa: #13707b;
-  --caixa-nicho: #0b4e57;
   --sombra: rgba(0, 0, 0, 0.5);
   color-scheme: dark;
 }
@@ -350,8 +347,8 @@ svg {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   grid-template-areas:
-    'intro demo'
-    'extra demo';
+    'intro midia'
+    'extra midia';
   column-gap: clamp(32px, 5vw, 64px);
   row-gap: 26px;
   align-items: center;
@@ -365,8 +362,71 @@ svg {
   min-width: 0;
 }
 
-.hero-grade .demo {
-  grid-area: demo;
+.hero-midia {
+  grid-area: midia;
+  position: relative;
+  justify-self: center;
+  width: min(100%, 340px);
+}
+
+.hero-midia .video {
+  max-width: none;
+}
+
+.hero-deco {
+  position: absolute;
+  pointer-events: none;
+}
+
+.hero-deco-bomba {
+  width: 24%;
+  top: 9%;
+  right: -13%;
+  animation: boiar 4s ease-in-out infinite;
+}
+
+.hero-deco-bicho {
+  width: 34%;
+  bottom: 7%;
+  left: -17%;
+  animation: balancar 3.4s ease-in-out infinite;
+}
+
+/* ---------- vídeos do produto ---------- */
+
+.video {
+  position: relative;
+  width: 100%;
+  max-width: 340px;
+  aspect-ratio: 9 / 16;
+  margin: 0;
+  overflow: hidden;
+  border-radius: 28px;
+  background: var(--mar);
+  box-shadow: 0 28px 50px -26px var(--sombra);
+}
+
+.video video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* o selo fica sempre sobre o vídeo, então as cores são fixas */
+.video-selo {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: rgba(10, 43, 49, 0.72);
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  pointer-events: none;
 }
 
 .hero-extra {
@@ -692,60 +752,8 @@ svg {
   align-items: center;
 }
 
-.caixa {
+.caixa-video {
   justify-self: center;
-  width: min(100%, 470px);
-  padding: 16px;
-  background: var(--caixa);
-  border-radius: 26px;
-  transform: rotate(-2.5deg);
-  box-shadow: 0 28px 50px -26px var(--sombra);
-}
-
-.caixa-tampa {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 4px 6px 14px;
-  color: #eafbf8;
-  font-weight: 800;
-  font-size: 0.82rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.caixa-tampa span:first-child {
-  font-family: var(--fonte-titulo);
-  font-weight: 400;
-  letter-spacing: 0.02em;
-  text-transform: none;
-  font-size: 1.05rem;
-}
-
-.caixa-grade {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-}
-
-.caixa-nicho {
-  display: grid;
-  place-items: center;
-  aspect-ratio: 1;
-  padding: 9%;
-  background: var(--caixa-nicho);
-  border-radius: 16px;
-  box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.25);
-}
-
-.caixa-nicho svg {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-
-.caixa-bicho {
-  transform: rotate(8deg) scale(1.08);
 }
 
 .caixa-texto {
@@ -788,10 +796,17 @@ svg {
 
 /* ---------- passos ---------- */
 
+.passos-texto {
+  min-width: 0;
+}
+
+.passos-video {
+  justify-self: center;
+}
+
 .passos {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 18px;
+  gap: 12px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -799,20 +814,22 @@ svg {
 
 .passo {
   display: grid;
-  align-content: start;
-  gap: 10px;
-  padding: 26px 22px 28px;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 18px;
+  row-gap: 4px;
+  align-items: start;
+  padding: 18px 22px;
   background: var(--cartao);
   border: 1.5px solid var(--linha);
   border-radius: var(--raio);
 }
 
 .passo-numero {
+  grid-row: span 2;
   display: grid;
   place-items: center;
-  width: 54px;
-  height: 54px;
-  margin-bottom: 6px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   background: radial-gradient(circle at 34% 30%, rgba(255, 255, 255, 0.6), transparent 45%), var(--cor);
   color: #0a2b31;
@@ -823,6 +840,12 @@ svg {
 
 .passo p {
   color: var(--texto-2);
+}
+
+.experimente-texto {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
 }
 
 /* ---------- fundo do mar ---------- */
@@ -931,10 +954,26 @@ svg {
 
 /* ---------- benefícios ---------- */
 
+.beneficios-grade {
+  display: grid;
+  grid-template-columns: minmax(0, 340px) minmax(0, 1fr);
+  gap: clamp(32px, 6vw, 80px);
+  align-items: start;
+}
+
+.beneficios-video {
+  position: sticky;
+  top: 96px;
+}
+
+.beneficios-texto {
+  min-width: 0;
+}
+
 .beneficios {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0 40px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 36px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -1361,14 +1400,17 @@ fieldset {
 
 .final-conteudo {
   display: grid;
-  justify-items: center;
-  gap: 18px;
-  text-align: center;
+  grid-template-columns: minmax(0, 300px) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(32px, 6vw, 80px);
   padding-bottom: clamp(64px, 8vw, 104px);
 }
 
-.final-conteudo .secao-intro {
-  margin-inline: auto;
+.final-texto {
+  display: grid;
+  justify-items: start;
+  gap: 18px;
+  min-width: 0;
 }
 
 .final-bichos {
@@ -1424,7 +1466,7 @@ fieldset {
 @media (max-width: 980px) {
   .hero-grade {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-areas: 'intro' 'demo' 'extra';
+    grid-template-areas: 'intro' 'midia' 'extra';
     max-width: 600px;
     row-gap: 18px;
   }
@@ -1434,12 +1476,37 @@ fieldset {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .caixa {
+  .caixa-video {
     order: 2;
   }
 
-  .passos {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .beneficios-grade {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .beneficios-video {
+    position: static;
+    justify-self: center;
+    order: 2;
+  }
+
+  .final-conteudo {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    text-align: center;
+  }
+
+  .final-video {
+    order: 2;
+    max-width: 280px;
+  }
+
+  .final-texto {
+    justify-items: center;
+  }
+
+  .final-texto .secao-intro {
+    margin-inline: auto;
   }
 
   .bichos {
@@ -1526,9 +1593,25 @@ fieldset {
     font-size: 1rem;
   }
 
-  .passos,
   .beneficios {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .video {
+    max-width: 280px;
+    border-radius: 24px;
+  }
+
+  .hero-midia {
+    width: min(100%, 280px);
+  }
+
+  .hero-deco-bomba {
+    right: -8%;
+  }
+
+  .hero-deco-bicho {
+    left: -9%;
   }
 
   .kit {
@@ -1546,10 +1629,6 @@ fieldset {
 
   .resumo {
     padding: 22px;
-  }
-
-  .caixa-tampa span:last-child {
-    display: none;
   }
 
   .faq details p {
