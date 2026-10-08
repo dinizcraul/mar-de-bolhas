@@ -1,0 +1,9 @@
+{
+  // Cloudflare Workers: publica como site estático o que o "npm run build" gera em dist/.
+  // O nome do Worker no painel do Cloudflare precisa ser igual ao "name" abaixo.
+  "name": "mar-de-bolhas",
+  "compatibility_date": "2026-10-06",
+  "assets": {
+    "directory": "./dist"
+  }
+}
