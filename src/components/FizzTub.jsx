@@ -130,11 +130,17 @@ export default function FizzTub() {
   useEffect(() => {
     if (reduzido) return
     let t
+    // Só conta se a banheira ficar na tela: passar por ela rolando até um link não gasta a demonstração
     const io = new IntersectionObserver(
       ([e]) => {
-        if (!e.isIntersecting || jaJogou.current) return
-        io.disconnect()
+        clearTimeout(t)
+        if (jaJogou.current) {
+          io.disconnect()
+          return
+        }
+        if (!e.isIntersecting || e.intersectionRatio < 0.59) return
         t = setTimeout(() => {
+          io.disconnect()
           if (!jaJogou.current) jogarRef.current()
         }, AUTO_MS)
       },

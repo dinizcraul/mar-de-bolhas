@@ -11,7 +11,7 @@ npm install
 npm run dev
 ```
 
-`npm run build` gera `dist/index.html`, um arquivo único com tudo embutido.
+`npm run build` gera a pasta `dist/`: o `index.html`, com o código e os estilos embutidos, e a pasta `midia/` com os vídeos. Para abrir ou mandar o site, use a pasta `dist/` inteira.
 
 ## Antes de publicar
 
@@ -20,7 +20,11 @@ Tudo que muda fica em `src/data.js`:
 - **Link de compra**: preencha `LINK_LOJA` (checkout ou loja) ou `WHATSAPP` (só dígitos, com DDI e DDD, ex.: `5531999999999`). Com o WhatsApp, o botão abre a conversa com o kit e o preço já escritos. Se os dois ficarem vazios, os botões levam até a seção de kits.
 - **Preços**: os valores em `kits` são exemplos. O preço por bombinha e a economia são calculados sozinhos.
 - **Bichinhos**: confira a lista `bichinhos` com os brinquedos do lote que você vende.
-- **Vídeos do produto**: ficam em `public/midia/` e estão ligados às seções em `videos` (topo, caixa, como funciona, benefícios e final). Para trocar um, substitua o `.mp4` e o pôster `.jpg` com o mesmo nome. Vídeos em MP4 (H.264), verticais e sem áudio funcionam melhor.
+- **Vídeos do produto**: ficam em `public/midia/` e estão ligados às seções em `videos` (topo, caixa, como funciona, benefícios e final). Para trocar um, substitua o `.mp4` e o pôster `.jpg` com o mesmo nome. Vídeos em MP4 (H.264), verticais e sem áudio funcionam melhor. Cada arquivo precisa ter menos de 25 MB (limite do Cloudflare). Para converter um vídeo do celular:
+
+  ```
+  ffmpeg -i original.mov -vf "scale=540:960:force_original_aspect_ratio=increase,crop=540:960" -c:v libx264 -profile:v high -crf 26 -pix_fmt yuv420p -an -movflags +faststart nome.mp4
+  ```
 - **Mais fotos e vídeos**: coloque os arquivos em `public/midia/` e liste em `midia`. Uma galeria extra aparece sozinha.
 - **Depoimentos**: adicione avaliações reais de clientes em `depoimentos`. A seção só aparece quando houver alguma.
 
