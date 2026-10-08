@@ -402,7 +402,6 @@ svg {
   margin: 0;
   overflow: hidden;
   border-radius: 28px;
-  background: var(--mar);
   box-shadow: 0 28px 50px -26px var(--sombra);
 }
 
@@ -414,6 +413,7 @@ svg {
   width: 100%;
   height: calc(100% + 1px);
   object-fit: cover;
+  background: var(--mar);
 }
 
 /* o selo fica sempre sobre o vídeo, então as cores são fixas */
@@ -667,7 +667,7 @@ svg {
 .demo-painel {
   display: grid;
   gap: 16px;
-  max-width: 560px;
+  max-width: 526px;
   margin: 10px auto 0;
 }
 
@@ -1430,7 +1430,7 @@ fieldset {
 
 .final-conteudo {
   display: grid;
-  grid-template-columns: minmax(0, 300px) minmax(0, 520px);
+  grid-template-columns: minmax(0, 300px) minmax(0, calc(8.75 * clamp(2rem, 3vw + 0.8rem, 3.1rem)));
   justify-content: center;
   align-items: center;
   gap: clamp(32px, 6vw, 80px);
@@ -1524,7 +1524,7 @@ fieldset {
 
   .experimente-texto {
     width: 100%;
-    max-width: 560px;
+    max-width: 526px;
     justify-self: center;
   }
 
@@ -1675,6 +1675,16 @@ fieldset {
 
   .faq details p {
     padding-right: 0;
+  }
+}
+
+@media (max-width: 360px) {
+  .hero-deco-bomba {
+    right: -4%;
+  }
+
+  .hero-deco-bicho {
+    left: -4%;
   }
 }
 
