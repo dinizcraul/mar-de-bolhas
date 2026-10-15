@@ -19,7 +19,7 @@ export const WHATSAPP = ''
 // - cidade: cidade do titular (até 15 letras; acentos saem sozinhos)
 // O pedido completo chega pelo WHATSAPP acima, quando o cliente toca em "Já paguei".
 export const PIX = {
-  chave: '5a1550f3-8e00-417a-867b-b0c3423efb7c',
+  chave: '958d72d0-9c12-43b1-8484-5c8326da9890',
   nome: 'Thiago dos Passos Oliveira',
   cidade: 'BELO HORIZONTE',
 }
