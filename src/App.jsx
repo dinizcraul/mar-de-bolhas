@@ -5,6 +5,7 @@ import FizzTub from './components/FizzTub'
 import BathBomb from './components/BathBomb'
 import SeaToy from './components/SeaToy'
 import Oferta from './components/Oferta'
+import Checkout from './components/Checkout'
 import VideoProduto from './components/VideoProduto'
 import {
   marca,
@@ -366,7 +367,24 @@ function BarraCompra() {
   )
 }
 
+// O checkout fica no mesmo site, no endereço #checkout (funciona até abrindo o dist/ direto no computador)
+const noCheckout = () => window.location.hash.startsWith('#checkout')
+
 export default function App() {
+  const [checkout, setCheckout] = useState(noCheckout)
+  useEffect(() => {
+    const mudar = () => setCheckout(noCheckout())
+    window.addEventListener('hashchange', mudar)
+    return () => window.removeEventListener('hashchange', mudar)
+  }, [])
+  // Voltando do checkout, a página volta montada e precisa achar a seção do endereço
+  useEffect(() => {
+    if (checkout || window.location.hash.length < 2) return
+    document.getElementById(decodeURIComponent(window.location.hash.slice(1)))?.scrollIntoView({ behavior: 'instant' })
+  }, [checkout])
+
+  if (checkout) return <Checkout />
+
   return (
     <>
       <Cabecalho />

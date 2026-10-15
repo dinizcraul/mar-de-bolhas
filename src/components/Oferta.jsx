@@ -14,7 +14,7 @@ export default function Oferta() {
   const economia = precoCaixa * caixas - kit.preco
   const resumoTema = kit.escolheTema ? `Tema ${tema}` : kit.detalhe
   const mensagem = `Olá! Quero o kit ${kit.titulo} (${kit.bombas} bombinhas, ${resumoTema}) por ${brl(kit.preco)}.`
-  const href = linkCompra(mensagem)
+  const href = linkCompra(mensagem, { kit: kit.id, tema })
 
   return (
     <section className="secao azulejo secao-colada" id="kits" aria-labelledby="kits-titulo">

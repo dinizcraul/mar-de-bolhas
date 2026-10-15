@@ -12,6 +12,24 @@ export const marca = {
 export const LINK_LOJA = ''
 export const WHATSAPP = ''
 
+// Checkout próprio com Pix. Com a chave preenchida, os botões de compra abrem o checkout
+// do site (endereço #checkout) e o cliente paga por QR code ou Pix copia e cola.
+// - chave: sua chave aleatória, como aparece no app do banco (ex.: '123e4567-e89b-12d3-a456-426614174000')
+// - nome: nome do titular da conta, como o banco mostra (até 25 letras, sem acento)
+// - cidade: cidade do titular (até 15 letras, sem acento)
+// O pedido completo chega pelo WHATSAPP acima, quando o cliente toca em "Já paguei".
+export const PIX = {
+  chave: '',
+  nome: 'MAR DE BOLHAS',
+  cidade: 'BELO HORIZONTE',
+}
+
+// Opções de entrega mostradas no checkout. Com uma só, ela já vem marcada.
+// valor 0 aparece como "Grátis". Confira prazos e valores antes de publicar.
+export const fretes = [
+  { id: 'padrao', nome: 'Entrega padrão', prazo: '5 a 10 dias úteis após o pagamento', valor: 0 },
+]
+
 // Preços de exemplo: troque pelos seus antes de publicar
 export const kits = [
   {

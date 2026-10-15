@@ -17,7 +17,8 @@ npm run dev
 
 Tudo que muda fica em `src/data.js`:
 
-- **Link de compra**: preencha `LINK_LOJA` (checkout ou loja) ou `WHATSAPP` (só dígitos, com DDI e DDD, ex.: `5531999999999`). Com o WhatsApp, o botão abre a conversa com o kit e o preço já escritos. Se os dois ficarem vazios, os botões levam até a seção de kits.
+- **Link de compra** (quando o Pix não estiver configurado): preencha `LINK_LOJA` (checkout ou loja) ou `WHATSAPP` (só dígitos, com DDI e DDD, ex.: `5531999999999`). Com o WhatsApp, o botão abre a conversa com o kit e o preço já escritos. Se os dois ficarem vazios, os botões levam até a seção de kits.
+- **Checkout com Pix**: preencha `PIX` com a sua chave aleatória, o nome do titular e a cidade. Com a chave preenchida, o botão "Comprar agora" abre o checkout do próprio site (`#checkout`): o cliente preenche dados e endereço (o CEP completa o endereço sozinho), escolhe a entrega e recebe um Pix com QR code e copia e cola no valor exato do pedido. O Pix é gerado no navegador, sem intermediário e sem taxa. Cada pedido tem um código (ex.: `MB7KVZBJ`) que aparece no Pix, para você achar o pagamento no extrato. Preencha também o `WHATSAPP`: é por ele que o pedido completo chega, quando o cliente toca em "Já paguei". As opções de entrega ficam em `fretes`.
 - **Preços**: os valores em `kits` são exemplos. O preço por bombinha e a economia são calculados sozinhos.
 - **Bichinhos**: confira a lista `bichinhos` com os brinquedos do lote que você vende.
 - **Vídeos do produto**: ficam em `public/midia/` e estão ligados às seções em `videos` (topo, caixa, como funciona, benefícios e final). Para trocar um, substitua o `.mp4` e o pôster `.jpg` com o mesmo nome. Vídeos em MP4 (H.264), verticais e sem áudio funcionam melhor. Cada arquivo precisa ter menos de 25 MB (limite do Cloudflare). Para converter um vídeo do celular:
