@@ -21,11 +21,21 @@ export function crc16(texto) {
 const limpa = (texto, max) =>
   texto
     .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
+    .replace(/[\u0300-\u036f]/g, '')
     .replace(/[^A-Za-z0-9 ]/g, '')
     .trim()
     .toUpperCase()
     .slice(0, max)
+
+// Nome do recebedor com até 25 letras: tira "de", "da", "dos"... e depois abrevia os nomes do meio
+// (ex.: THIAGO DOS PASSOS OLIVEIRA vira THIAGO PASSOS OLIVEIRA)
+function nomeCurto(nome) {
+  let partes = limpa(nome, 200).split(/\s+/).filter(Boolean)
+  const cabe = () => partes.join(' ').length <= 25
+  if (!cabe()) partes = partes.filter((p, i) => i === 0 || i === partes.length - 1 || !/^(DA|DAS|DE|DO|DOS|E)$/.test(p))
+  for (let i = 1; i < partes.length - 1 && !cabe(); i++) partes[i] = partes[i][0]
+  return partes.join(' ').slice(0, 25)
+}
 
 export function codigoPix({ chave, nome, cidade, valor, txid, descricao }) {
   const conta =
@@ -38,7 +48,7 @@ export function codigoPix({ chave, nome, cidade, valor, txid, descricao }) {
     campo('53', '986') +
     (valor > 0 ? campo('54', valor.toFixed(2)) : '') +
     campo('58', 'BR') +
-    campo('59', limpa(nome, 25)) +
+    campo('59', nomeCurto(nome)) +
     campo('60', limpa(cidade, 15)) +
     campo('62', campo('05', id)) +
     '6304'

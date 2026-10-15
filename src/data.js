@@ -15,12 +15,12 @@ export const WHATSAPP = ''
 // Checkout próprio com Pix. Com a chave preenchida, os botões de compra abrem o checkout
 // do site (endereço #checkout) e o cliente paga por QR code ou Pix copia e cola.
 // - chave: sua chave aleatória, como aparece no app do banco (ex.: '123e4567-e89b-12d3-a456-426614174000')
-// - nome: nome do titular da conta, como o banco mostra (até 25 letras, sem acento)
-// - cidade: cidade do titular (até 15 letras, sem acento)
+// - nome: nome do titular da conta (se passar de 25 letras, o Pix abrevia sozinho)
+// - cidade: cidade do titular (até 15 letras; acentos saem sozinhos)
 // O pedido completo chega pelo WHATSAPP acima, quando o cliente toca em "Já paguei".
 export const PIX = {
-  chave: '',
-  nome: 'MAR DE BOLHAS',
+  chave: '5a1550f3-8e00-417a-867b-b0c3423efb7c',
+  nome: 'Thiago dos Passos Oliveira',
   cidade: 'BELO HORIZONTE',
 }
 
