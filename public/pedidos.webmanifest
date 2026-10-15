@@ -1,0 +1,13 @@
+{
+  "name": "Pedidos Mar de Bolhas",
+  "short_name": "Pedidos",
+  "start_url": "./pedidos",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f1f8f7",
+  "theme_color": "#0b5360",
+  "icons": [
+    { "src": "icones/pedidos-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icones/pedidos-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

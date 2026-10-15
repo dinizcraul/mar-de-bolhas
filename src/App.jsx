@@ -5,6 +5,8 @@ import FizzTub from './components/FizzTub'
 import BathBomb from './components/BathBomb'
 import SeaToy from './components/SeaToy'
 import Oferta from './components/Oferta'
+import Checkout from './components/Checkout'
+import Pedidos from './components/Pedidos'
 import VideoProduto from './components/VideoProduto'
 import {
   marca,
@@ -366,7 +368,33 @@ function BarraCompra() {
   )
 }
 
+// O checkout fica no mesmo site, no endereço #checkout (funciona até abrindo o dist/ direto no computador).
+// A página de pedidos fica em /pedidos (ou #admin) e só abre com a senha.
+const telaAtual = () => {
+  const hash = window.location.hash
+  if (window.location.pathname.endsWith('/pedidos')) return 'admin'
+  if (hash.startsWith('#checkout')) return 'checkout'
+  if (hash.startsWith('#admin')) return 'admin'
+  return 'site'
+}
+
 export default function App() {
+  const [tela, setTela] = useState(telaAtual)
+  const foraDoSite = tela !== 'site'
+  useEffect(() => {
+    const mudar = () => setTela(telaAtual())
+    window.addEventListener('hashchange', mudar)
+    return () => window.removeEventListener('hashchange', mudar)
+  }, [])
+  // Voltando do checkout, a página volta montada e precisa achar a seção do endereço
+  useEffect(() => {
+    if (foraDoSite || window.location.hash.length < 2) return
+    document.getElementById(decodeURIComponent(window.location.hash.slice(1)))?.scrollIntoView({ behavior: 'instant' })
+  }, [foraDoSite])
+
+  if (tela === 'checkout') return <Checkout />
+  if (tela === 'admin') return <Pedidos />
+
   return (
     <>
       <Cabecalho />

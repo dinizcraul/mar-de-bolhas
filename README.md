@@ -17,7 +17,8 @@ npm run dev
 
 Tudo que muda fica em `src/data.js`:
 
-- **Link de compra**: preencha `LINK_LOJA` (checkout ou loja) ou `WHATSAPP` (só dígitos, com DDI e DDD, ex.: `5531999999999`). Com o WhatsApp, o botão abre a conversa com o kit e o preço já escritos. Se os dois ficarem vazios, os botões levam até a seção de kits.
+- **Link de compra** (quando o Pix não estiver configurado): preencha `LINK_LOJA` (checkout ou loja) ou `WHATSAPP` (só dígitos, com DDI e DDD, ex.: `5531999999999`). Com o WhatsApp, o botão abre a conversa com o kit e o preço já escritos. Se os dois ficarem vazios, os botões levam até a seção de kits.
+- **Checkout com Pix**: preencha `PIX` com a sua chave aleatória, o nome do titular e a cidade. Com a chave preenchida, o botão "Comprar agora" abre o checkout do próprio site (`#checkout`): o cliente preenche dados e endereço (o CEP completa o endereço sozinho), escolhe a entrega e recebe um Pix com QR code e copia e cola no valor exato do pedido. O Pix é gerado no navegador, sem intermediário e sem taxa. Cada pedido tem um código (ex.: `MB7KVZBJ`) que aparece no Pix, para você achar o pagamento no extrato. Os pedidos ficam guardados no Cloudflare e aparecem na página de pedidos (veja abaixo). Com o `WHATSAPP` preenchido, o botão "Já paguei" também abre a conversa com o pedido escrito, para o cliente mandar o comprovante. As opções de entrega ficam em `fretes`.
 - **Preços**: os valores em `kits` são exemplos. O preço por bombinha e a economia são calculados sozinhos.
 - **Bichinhos**: confira a lista `bichinhos` com os brinquedos do lote que você vende.
 - **Vídeos do produto**: ficam em `public/midia/` e estão ligados às seções em `videos` (topo, caixa, como funciona, benefícios e final). Para trocar um, substitua o `.mp4` e o pôster `.jpg` com o mesmo nome. Vídeos em MP4 (H.264), verticais e sem áudio funcionam melhor. Cada arquivo precisa ter menos de 25 MB (limite do Cloudflare). Para converter um vídeo do celular:
@@ -27,6 +28,20 @@ Tudo que muda fica em `src/data.js`:
   ```
 - **Mais fotos e vídeos**: coloque os arquivos em `public/midia/` e liste em `midia`. Uma galeria extra aparece sozinha.
 - **Depoimentos**: adicione avaliações reais de clientes em `depoimentos`. A seção só aparece quando houver alguma.
+
+## Página de pedidos
+
+Os pedidos do checkout ficam no banco D1 `mar-de-bolhas-pedidos` do Cloudflare (já ligado no `wrangler.jsonc`), e você acompanha tudo em `seusite.com/pedidos`: quem gerou o Pix, quem avisou que pagou, o que falta enviar, com endereço, CPF, botão para chamar o cliente no WhatsApp e o código de rastreio.
+
+1. Crie a senha: no painel do Cloudflare, abra **Workers & Pages > mar-de-bolhas > Settings > Variables and Secrets > Add**, escolha o tipo **Secret**, nome `ADMIN_SENHA` e uma senha longa só sua. Depois clique em **Deploy**.
+2. No iPhone, abra `seusite.com/pedidos` no Safari e entre com a senha.
+3. Toque em **Compartilhar** (o quadrado com a seta) e depois em **Adicionar à Tela de Início**. A página vira um ícone e abre como um app, sem a barra do Safari. Na primeira vez que abrir pelo ícone, ele pede a senha de novo.
+
+Cada pedido passa por: **Aguardando Pix** (gerou o Pix) → **Conferir Pix** (o cliente tocou em "Já paguei") → **Pago, falta enviar** (você tocou em "Pix recebido") → **Enviado**. A lista atualiza sozinha a cada minuto e sempre que você volta para o app. O botão **Baixar planilha** gera um CSV que abre no Excel ou no Numbers.
+
+As prévias dos pull requests usam outro banco, `mar-de-bolhas-pedidos-preview` (bloco `previews` do `wrangler.jsonc`), para os testes nunca se misturarem com os pedidos de verdade. A página de pedidos da prévia só abre se você também cadastrar uma senha nela com `npx wrangler preview secret`.
+
+Para testar no computador com o banco local: crie um arquivo `.dev.vars` com `ADMIN_SENHA=uma-senha`, rode `npx wrangler d1 migrations apply DB --local` uma vez e depois `npm run dev:worker`.
 
 ## Publicar no Cloudflare
 

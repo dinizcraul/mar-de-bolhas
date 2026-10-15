@@ -1,9 +1,34 @@
 {
-  // Cloudflare Workers: publica como site estático o que o "npm run build" gera em dist/.
+  // Cloudflare Workers: publica o site que o "npm run build" gera em dist/ e roda o worker/index.js,
+  // que guarda os pedidos do checkout no banco D1 e atende a página de pedidos (#admin).
   // O nome do Worker no painel do Cloudflare precisa ser igual ao "name" abaixo.
   "name": "mar-de-bolhas",
+  "main": "worker/index.js",
   "compatibility_date": "2026-10-06",
   "assets": {
-    "directory": "./dist"
-  }
+    "directory": "./dist",
+    "binding": "ASSETS",
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "mar-de-bolhas-pedidos",
+      "database_id": "f3bb7380-cae2-45f1-affc-0c882b9115b8",
+      "migrations_dir": "migrations",
+    },
+  ],
+  "observability": {
+    "enabled": true,
+  },
+  // Prévias dos pull requests (Workers Builds): usam um banco de teste, nunca os pedidos de verdade.
+  "previews": {
+    "d1_databases": [
+      {
+        "binding": "DB",
+        "database_name": "mar-de-bolhas-pedidos-preview",
+        "database_id": "7280482f-e8fc-428a-bdfd-9eb6c8956b99",
+        "migrations_dir": "migrations",
+      },
+    ],
+  },
 }
