@@ -39,6 +39,8 @@ Os pedidos do checkout ficam no banco D1 `mar-de-bolhas-pedidos` do Cloudflare (
 
 Cada pedido passa por: **Aguardando Pix** (gerou o Pix) → **Conferir Pix** (o cliente tocou em "Já paguei") → **Pago, falta enviar** (você tocou em "Pix recebido") → **Enviado**. A lista atualiza sozinha a cada minuto e sempre que você volta para o app. O botão **Baixar planilha** gera um CSV que abre no Excel ou no Numbers.
 
+As prévias dos pull requests usam outro banco, `mar-de-bolhas-pedidos-preview` (bloco `previews` do `wrangler.jsonc`), para os testes nunca se misturarem com os pedidos de verdade. A página de pedidos da prévia só abre se você também cadastrar uma senha nela com `npx wrangler preview secret`.
+
 Para testar no computador com o banco local: crie um arquivo `.dev.vars` com `ADMIN_SENHA=uma-senha`, rode `npx wrangler d1 migrations apply DB --local` uma vez e depois `npm run dev:worker`.
 
 ## Publicar no Cloudflare
