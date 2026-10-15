@@ -10,7 +10,9 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy": "vite build && wrangler deploy",
+    "dev:worker": "vite build && wrangler dev"
   },
   "dependencies": {
     "lucide-react": "^1.50.0",
@@ -24,6 +26,7 @@
     "@vitejs/plugin-react": "^6.1.1",
     "oxlint": "^1.81.0",
     "vite": "^8.3.0",
-    "vite-plugin-singlefile": "^2.3.3"
+    "vite-plugin-singlefile": "^2.3.3",
+    "wrangler": "^4.151.0"
   }
 }

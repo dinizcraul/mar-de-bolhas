@@ -6,6 +6,7 @@ import {
   Copy,
   Lock,
   MessageCircle,
+  PartyPopper,
   Pencil,
   QrCode as IconeQr,
   ShieldCheck,
@@ -20,6 +21,8 @@ import { brl } from '../compra'
 import { codigoPix, novoCodigoPedido } from '../pix'
 
 const GUARDA = 'mar-de-bolhas:checkout'
+// A API de pedidos só existe no site publicado (Cloudflare), não no arquivo aberto direto do computador
+const API = window.location.protocol.startsWith('http')
 
 const vazio = {
   nome: '',
@@ -262,6 +265,8 @@ export default function Checkout() {
       freteId: salvo.freteId || (fretes.length === 1 ? fretes[0].id : ''),
       // Um pedido novo vindo dos botões do site começa sem Pix gerado
       pedido: veioDoSite ? null : salvo.pedido || null,
+      // O código só muda depois que o cliente avisa que pagou: gerar o Pix de novo mantém o mesmo pedido
+      codigo: salvo.codigo || null,
     }
   }, [])
 
@@ -270,6 +275,7 @@ export default function Checkout() {
   const [form, setForm] = useState(inicial.form)
   const [freteId, setFreteId] = useState(inicial.freteId)
   const [pedido, setPedido] = useState(inicial.pedido)
+  const [codigo, setCodigo] = useState(inicial.codigo)
   const [tocados, setTocados] = useState({})
   const [etapa, setEtapa] = useState(() => {
     if (inicial.pedido) return 3
@@ -288,8 +294,8 @@ export default function Checkout() {
   const resumoTema = kit.escolheTema ? `Tema ${tema}` : kit.detalhe
 
   useEffect(() => {
-    guardar({ kitId, tema, form, freteId, pedido })
-  }, [kitId, tema, form, freteId, pedido])
+    guardar({ kitId, tema, form, freteId, pedido, codigo })
+  }, [kitId, tema, form, freteId, pedido, codigo])
 
   useEffect(() => {
     window.scrollTo(0, 0)
@@ -348,8 +354,29 @@ export default function Checkout() {
   }
 
   function gerarPix() {
-    setPedido({ codigo: pedido?.codigo || novoCodigoPedido(), criadoEm: Date.now() })
+    const novo = codigo || novoCodigoPedido()
+    setCodigo(novo)
+    setPedido({ codigo: novo, criadoEm: Date.now() })
+    enviarPedido(novo)
     requestAnimationFrame(() => topoRef.current?.scrollIntoView({ block: 'start' }))
+  }
+
+  // Guarda o pedido no banco do site (worker/index.js), para aparecer na página de pedidos.
+  // Se não der (site aberto direto do computador, sem internet), o checkout segue igual.
+  function enviarPedido(codigoPedido) {
+    if (!API) return
+    fetch('/api/pedidos', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ codigo: codigoPedido, kitId: kit.id, tema, freteId, cliente: form }),
+      keepalive: true,
+    }).catch(() => {})
+  }
+
+  function avisarPagamento() {
+    if (API) fetch(`/api/pedidos/${pedido.codigo}/paguei`, { method: 'POST', keepalive: true }).catch(() => {})
+    setPedido((p) => ({ ...p, avisou: true }))
+    setCodigo(null)
   }
 
   const pix = useMemo(
@@ -467,24 +494,50 @@ export default function Checkout() {
                       </ol>
                     </div>
                   </div>
-                  <div className="ck-pix-depois">
-                    <h2>Depois de pagar</h2>
-                    {linkWhats ? (
-                      <>
-                        <p>Mande o comprovante pelo WhatsApp. O pedido já vai escrito, com seus dados e o endereço.</p>
-                        <a className="botao botao-mar botao-largo" href={linkWhats} target="_blank" rel="noopener noreferrer">
-                          <MessageCircle size={18} aria-hidden="true" /> Já paguei, enviar comprovante
-                        </a>
-                      </>
+                  <div className="ck-pix-depois" aria-live="polite">
+                    {pedido.avisou ? (
+                      <div className="ck-pix-ok">
+                        <h2>
+                          <PartyPopper size={20} aria-hidden="true" /> Recebemos seu aviso
+                        </h2>
+                        <p>
+                          Assim que o Pix aparecer na conta, separamos o seu kit e te avisamos com o código de
+                          rastreio. Guarde o comprovante e o código do pedido, <strong>{pedido.codigo}</strong>.
+                        </p>
+                        {linkWhats && (
+                          <a className="botao botao-linha botao-largo" href={linkWhats} target="_blank" rel="noopener noreferrer">
+                            <MessageCircle size={18} aria-hidden="true" /> Mandar o comprovante pelo WhatsApp
+                          </a>
+                        )}
+                      </div>
                     ) : (
-                      <p>
-                        Guarde o comprovante e o código do pedido, <strong>{pedido.codigo}</strong>. Ele aparece na
-                        descrição do Pix e é por ele que achamos o seu pagamento.
-                      </p>
+                      <>
+                        <h2>Depois de pagar</h2>
+                        <p>
+                          {linkWhats
+                            ? 'Toque abaixo para avisar e mandar o comprovante pelo WhatsApp. O pedido já vai escrito, com seus dados e o endereço.'
+                            : 'Toque abaixo para avisar que pagou. Conferimos o Pix pelo código do pedido, que aparece no comprovante.'}
+                        </p>
+                        {linkWhats ? (
+                          <a
+                            className="botao botao-mar botao-largo"
+                            href={linkWhats}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={avisarPagamento}
+                          >
+                            <MessageCircle size={18} aria-hidden="true" /> Já paguei, enviar comprovante
+                          </a>
+                        ) : (
+                          <button type="button" className="botao botao-mar botao-largo" onClick={avisarPagamento}>
+                            <Check size={18} aria-hidden="true" /> Já paguei
+                          </button>
+                        )}
+                        <button type="button" className="ck-link" onClick={editar(3)}>
+                          Alterar o pedido
+                        </button>
+                      </>
                     )}
-                    <button type="button" className="ck-link" onClick={editar(3)}>
-                      Alterar o pedido
-                    </button>
                   </div>
                 </>
               ) : (
