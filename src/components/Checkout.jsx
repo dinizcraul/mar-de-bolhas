@@ -266,7 +266,7 @@ export default function Checkout() {
       kitId: kitUrl || salvo.kitId || 'duas',
       tema: temaUrl || salvo.tema || 'A',
       form: { ...vazio, ...salvo.form },
-      freteId: salvo.freteId || (fretes.length === 1 ? fretes[0].id : ''),
+      freteId: fretes.some((f) => f.id === salvo.freteId) ? salvo.freteId : fretes.length === 1 ? fretes[0].id : '',
       // Um pedido novo vindo dos botões do site começa sem Pix gerado
       pedido: veioDoSite ? null : salvo.pedido || null,
       // O código só muda depois que o cliente avisa que pagou: gerar o Pix de novo mantém o mesmo pedido
@@ -286,7 +286,8 @@ export default function Checkout() {
   const [etapa, setEtapa] = useState(() => {
     if (inicial.pedido) return 3
     if (camposEtapa[1].some((c) => erros[c](inicial.form))) return 1
-    if (camposEtapa[2].some((c) => erros[c](inicial.form))) return 2
+    // Sem entrega escolhida, o cliente volta para a etapa 2: o valor do Pix depende do frete
+    if (camposEtapa[2].some((c) => erros[c](inicial.form)) || !inicial.freteId) return 2
     return 3
   })
   const [buscaCep, setBuscaCep] = useState('')
@@ -377,7 +378,11 @@ export default function Checkout() {
       document.getElementById(`ck-${primeiroErro}`)?.focus()
       return
     }
-    if (numero === 2 && !frete) return
+    if (numero === 2 && !frete) {
+      setTocados((t) => ({ ...t, frete: true }))
+      document.querySelector('.ck-fretes input')?.focus()
+      return
+    }
     setEtapa(numero + 1)
     requestAnimationFrame(() => document.getElementById(`etapa-${numero + 1}`)?.scrollIntoView({ block: 'start' }))
   }
@@ -749,6 +754,7 @@ export default function Checkout() {
                         <strong>{f.valor ? brl(f.valor) : 'Grátis'}</strong>
                       </label>
                     ))}
+                    {tocados.frete && !frete && <p className="campo-erro">Escolha a forma de entrega</p>}
                   </fieldset>
 
                   <button type="submit" className="botao botao-coral botao-largo">
