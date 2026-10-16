@@ -32,10 +32,12 @@ export const PIXEL_META = '4209162972548281'
 // e repassa para o pixel da Meta cadastrado lá. Deixe vazio ('') para desligar.
 export const PIXEL_UTMIFY = '6ad21b6c67fb5c2d84ed0c1f'
 
-// Opções de entrega mostradas no checkout. Com uma só, ela já vem marcada.
-// valor 0 aparece como "Grátis". Confira prazos e valores antes de publicar.
+// Opções de entrega mostradas no checkout. Com uma só, ela já vem marcada; com mais, o cliente escolhe.
+// valor 0 aparece como "Grátis". O PAC fica com o id 'padrao' (a antiga entrega grátis), para quem
+// já estava no meio do checkout continuar com o mesmo frete.
 export const fretes = [
-  { id: 'padrao', nome: 'Entrega padrão', prazo: '5 a 10 dias úteis após o pagamento', valor: 0 },
+  { id: 'sedex', nome: 'SEDEX', prazo: '3 a 5 dias úteis após o pagamento', valor: 15.68 },
+  { id: 'padrao', nome: 'Correios PAC', prazo: '6 a 9 dias úteis após o pagamento', valor: 0 },
 ]
 
 // Preços de exemplo: troque pelos seus antes de publicar
