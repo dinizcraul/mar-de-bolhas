@@ -24,6 +24,10 @@ export const PIX = {
   cidade: 'BELO HORIZONTE',
 }
 
+// Pixel da Meta (Gerenciador de Eventos): mede visitas, carrinho e compras dos anúncios.
+// Deixe vazio ('') para desligar. A página de pedidos nunca carrega o Pixel.
+export const PIXEL_META = '4209162972548281'
+
 // Opções de entrega mostradas no checkout. Com uma só, ela já vem marcada.
 // valor 0 aparece como "Grátis". Confira prazos e valores antes de publicar.
 export const fretes = [

@@ -19,6 +19,7 @@ import QrCode from './QrCode'
 import { kits, temas, fretes, coresBomba, PIX, WHATSAPP, marca } from '../data'
 import { brl } from '../compra'
 import { codigoPix, novoCodigoPedido } from '../pix'
+import { evento, compra } from '../pixel'
 
 const GUARDA = 'mar-de-bolhas:checkout'
 // A API de pedidos só existe no site publicado (Cloudflare), não no arquivo aberto direto do computador
@@ -292,6 +293,29 @@ export default function Checkout() {
   const frete = fretes.find((f) => f.id === freteId)
   const total = kit.preco + (frete?.valor || 0)
   const resumoTema = kit.escolheTema ? `Tema ${tema}` : kit.detalhe
+  const pagamentoMarcado = useRef(false)
+
+  // Dados do pedido para o Pixel da Meta (src/pixel.js)
+  const dadosPixel = (valor) => ({
+    content_ids: [kit.id],
+    content_name: `${kit.titulo} (${kit.bombas} bombinhas)`,
+    content_type: 'product',
+    num_items: kit.bombas / 12,
+    value: Math.round(valor * 100) / 100,
+    currency: 'BRL',
+  })
+
+  useEffect(() => {
+    if (!pedido) evento('AddToCart', dadosPixel(kit.preco))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [kitId])
+
+  useEffect(() => {
+    if (etapa !== 3 || pedido || pagamentoMarcado.current) return
+    pagamentoMarcado.current = true
+    evento('AddPaymentInfo', dadosPixel(total))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [etapa, pedido])
 
   useEffect(() => {
     guardar({ kitId, tema, form, freteId, pedido, codigo })
@@ -358,6 +382,7 @@ export default function Checkout() {
     setCodigo(novo)
     setPedido({ codigo: novo, criadoEm: Date.now() })
     enviarPedido(novo)
+    compra(novo, dadosPixel(total))
     requestAnimationFrame(() => topoRef.current?.scrollIntoView({ block: 'start' }))
   }
 
