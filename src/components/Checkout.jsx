@@ -20,6 +20,7 @@ import { kits, temas, fretes, coresBomba, PIX, WHATSAPP, marca } from '../data'
 import { brl } from '../compra'
 import { codigoPix, novoCodigoPedido } from '../pix'
 import { evento, compra } from '../pixel'
+import { utmsDoCliente } from '../utms'
 
 const GUARDA = 'mar-de-bolhas:checkout'
 // A API de pedidos só existe no site publicado (Cloudflare), não no arquivo aberto direto do computador
@@ -393,7 +394,7 @@ export default function Checkout() {
     fetch('/api/pedidos', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ codigo: codigoPedido, kitId: kit.id, tema, freteId, cliente: form }),
+      body: JSON.stringify({ codigo: codigoPedido, kitId: kit.id, tema, freteId, cliente: form, utms: utmsDoCliente() }),
       keepalive: true,
     }).catch(() => {})
   }

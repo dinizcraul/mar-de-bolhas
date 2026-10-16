@@ -44,6 +44,17 @@ As prévias dos pull requests usam outro banco, `mar-de-bolhas-pedidos-preview` 
 
 Para testar no computador com o banco local: crie um arquivo `.dev.vars` com `ADMIN_SENHA=uma-senha`, rode `npx wrangler d1 migrations apply DB --local` uma vez e depois `npm run dev:worker`.
 
+## UTMify
+
+Cada pedido vai para a UTMify, que mostra quanto cada campanha, conjunto e anúncio vendeu. O site guarda os parâmetros `utm_*` do link do anúncio por 7 dias (`src/utms.js`) e manda junto com o pedido. O worker envia à UTMify (`worker/utmify.js`) quando o Pix é gerado (pendente), quando você marca **Pix recebido** (pago) e quando cancela (recusado, ou reembolsado se já estava pago).
+
+1. Na UTMify, abra **Integrações > Webhooks > Credenciais de API**, crie uma credencial e copie o token.
+2. No Cloudflare, cadastre o token como segredo, igual à senha da página de pedidos: **Workers & Pages > mar-de-bolhas > Settings > Variables and Secrets > Add**, tipo **Secret**, nome `UTMIFY_TOKEN`. Clique em **Deploy**.
+3. Em cada anúncio da Meta, em **Parâmetros de URL**, cole:
+   `utm_source=FB&utm_campaign={{campaign.name}}|{{campaign.id}}&utm_medium={{adset.name}}|{{adset.id}}&utm_content={{ad.name}}|{{ad.id}}&utm_term={{placement}}`
+
+Sem o segredo, nada é enviado. Se a UTMify recusar um pedido, o motivo aparece nos logs do Worker no Cloudflare (**Observability**).
+
 ## Publicar no Cloudflare
 
 Cada `git push` na branch `main` publica a versão nova sozinho. Escolha uma das duas opções.
