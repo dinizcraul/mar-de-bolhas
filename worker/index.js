@@ -4,11 +4,13 @@
 // Rotas públicas (usadas pelo checkout):
 //   POST /api/pedidos                  cria ou atualiza um pedido que ainda espera pagamento
 //   POST /api/pedidos/:codigo/paguei   o cliente avisou que pagou
+// Cada pedido criado ou mudado de status também vai para a UTMify (worker/utmify.js), se UTMIFY_TOKEN existir.
 // Rotas da página de pedidos (pedem a senha ADMIN_SENHA, cadastrada como segredo no Cloudflare):
 //   GET   /api/admin/pedidos           lista os pedidos
 //   PATCH /api/admin/pedidos/:codigo   muda status, código de rastreio ou observação
 
 import { kits, temas, fretes } from '../src/data.js'
+import { CAMPOS_UTM, enviarParaUtmify, statusUtmify } from './utmify.js'
 
 const STATUS = ['aguardando', 'pago', 'enviado', 'cancelado']
 const CODIGO = /^MB[A-Z0-9]{6}$/
@@ -32,6 +34,13 @@ async function lerCorpo(request) {
   } catch {
     return null
   }
+}
+
+// Parâmetros utm_* do anúncio que trouxe o cliente (src/utms.js), guardados como JSON
+function lerUtms(utms) {
+  if (!utms || typeof utms !== 'object') return null
+  const limpas = Object.fromEntries(CAMPOS_UTM.filter((c) => utms[c]).map((c) => [c, texto(utms[c], 500)]))
+  return Object.keys(limpas).length ? JSON.stringify(limpas) : null
 }
 
 // O total é sempre recalculado aqui com os preços de src/data.js, nunca aceito do navegador
@@ -61,6 +70,7 @@ function montarPedido(corpo) {
     bairro: texto(c.bairro),
     cidade: texto(c.cidade),
     uf: texto(c.uf, 2).toUpperCase(),
+    utms: lerUtms(corpo.utms),
   }
   const ok =
     pedido.nome.includes(' ') &&
@@ -76,24 +86,28 @@ function montarPedido(corpo) {
   return ok ? pedido : null
 }
 
-async function salvarPedido(request, env) {
+async function salvarPedido(request, env, ctx) {
   const corpo = await lerCorpo(request)
   const pedido = corpo && montarPedido(corpo)
   if (!pedido) return json({ erro: 'pedido-invalido' }, 400)
+  pedido.ip = texto(request.headers.get('cf-connecting-ip'), 45) || null
   const quando = agora()
   const colunas = Object.keys(pedido)
   // Um pedido já pago, enviado ou cancelado não muda mais por aqui
-  await env.DB.prepare(
+  const salvo = await env.DB.prepare(
     `INSERT INTO pedidos (${colunas.join(', ')}, criado_em, atualizado_em)
      VALUES (${colunas.map(() => '?').join(', ')}, ?, ?)
      ON CONFLICT (codigo) DO UPDATE SET ${colunas
        .filter((c) => c !== 'codigo')
-       .map((c) => `${c} = excluded.${c}`)
+       // Gerar o Pix de novo sem UTMs (passou a janela de 7 dias) não apaga as do anúncio que trouxe o pedido
+       .map((c) => (c === 'utms' ? 'utms = COALESCE(excluded.utms, pedidos.utms)' : `${c} = excluded.${c}`))
        .join(', ')}, atualizado_em = excluded.atualizado_em
-     WHERE pedidos.status = 'aguardando'`,
+     WHERE pedidos.status = 'aguardando'
+     RETURNING *`,
   )
     .bind(...Object.values(pedido), quando, quando)
-    .run()
+    .first()
+  if (salvo) ctx.waitUntil(enviarParaUtmify(salvo, env))
   return json({ codigo: pedido.codigo, total: pedido.total })
 }
 
@@ -121,7 +135,7 @@ async function listarPedidos(env) {
   return json({ pedidos: results })
 }
 
-async function atualizarPedido(request, codigo, env) {
+async function atualizarPedido(request, codigo, env, ctx) {
   const corpo = await lerCorpo(request)
   if (!corpo || !CODIGO.test(codigo)) return json({ erro: 'pedido-invalido' }, 400)
   const mudancas = {}
@@ -129,18 +143,29 @@ async function atualizarPedido(request, codigo, env) {
   if ('rastreio' in corpo) mudancas.rastreio = texto(corpo.rastreio, 60)
   if ('observacao' in corpo) mudancas.observacao = texto(corpo.observacao, 500)
   if (!Object.keys(mudancas).length) return json({ erro: 'nada-para-mudar' }, 400)
-  const pedido = await env.DB.prepare(
-    `UPDATE pedidos SET ${Object.keys(mudancas)
-      .map((c) => `${c} = ?`)
-      .join(', ')}, atualizado_em = ? WHERE codigo = ? RETURNING *`,
-  )
-    .bind(...Object.values(mudancas), agora(), codigo)
+  const quando = agora()
+  const campos = Object.keys(mudancas).map((c) => `${c} = ?`)
+  const valores = Object.values(mudancas)
+  // pago_em diz quando o Pix foi recebido e se um pedido cancelado chegou a ser pago
+  if (mudancas.status === 'pago' || mudancas.status === 'enviado') {
+    campos.push('pago_em = COALESCE(pago_em, ?)')
+    valores.push(quando)
+  }
+  if (mudancas.status === 'aguardando') campos.push('pago_em = NULL')
+  // Pedido pago antes de existir a coluna pago_em: o cancelamento ainda conta como reembolso
+  if (mudancas.status === 'cancelado')
+    campos.push(`pago_em = COALESCE(pago_em, CASE WHEN status IN ('pago', 'enviado') THEN atualizado_em END)`)
+  const antes = mudancas.status && (await env.DB.prepare(`SELECT * FROM pedidos WHERE codigo = ?`).bind(codigo).first())
+  const pedido = await env.DB.prepare(`UPDATE pedidos SET ${campos.join(', ')}, atualizado_em = ? WHERE codigo = ? RETURNING *`)
+    .bind(...valores, quando, codigo)
     .first()
-  return pedido ? json({ pedido }) : json({ erro: 'pedido-nao-encontrado' }, 404)
+  if (!pedido) return json({ erro: 'pedido-nao-encontrado' }, 404)
+  if (antes && statusUtmify(antes) !== statusUtmify(pedido)) ctx.waitUntil(enviarParaUtmify(pedido, env))
+  return json({ pedido })
 }
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url)
     const caminho = url.pathname
     // Endereço curto da página de pedidos, para salvar na tela de início do celular
@@ -149,7 +174,7 @@ export default {
     if (!caminho.startsWith('/api/')) return env.ASSETS.fetch(request)
 
     try {
-      if (caminho === '/api/pedidos' && request.method === 'POST') return await salvarPedido(request, env)
+      if (caminho === '/api/pedidos' && request.method === 'POST') return await salvarPedido(request, env, ctx)
       const paguei = caminho.match(/^\/api\/pedidos\/([A-Z0-9]+)\/paguei$/)
       if (paguei && request.method === 'POST') return await avisarPagamento(paguei[1], env)
 
@@ -158,7 +183,7 @@ export default {
         if (!(await senhaConfere(request, env))) return json({ erro: 'senha-errada' }, 401)
         if (caminho === '/api/admin/pedidos' && request.method === 'GET') return await listarPedidos(env)
         const um = caminho.match(/^\/api\/admin\/pedidos\/([A-Z0-9]+)$/)
-        if (um && request.method === 'PATCH') return await atualizarPedido(request, um[1], env)
+        if (um && request.method === 'PATCH') return await atualizarPedido(request, um[1], env, ctx)
       }
       return json({ erro: 'nao-encontrado' }, 404)
     } catch (erro) {

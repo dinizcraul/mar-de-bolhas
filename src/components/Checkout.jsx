@@ -20,8 +20,11 @@ import { kits, temas, fretes, coresBomba, PIX, WHATSAPP, marca } from '../data'
 import { brl } from '../compra'
 import { codigoPix, novoCodigoPedido } from '../pix'
 import { evento, compra } from '../pixel'
+import { utmsDoCliente } from '../utms'
 
 const GUARDA = 'mar-de-bolhas:checkout'
+// Um Pix abandonado ganha código novo depois de 6 dias: a UTMify recusa pedidos criados há mais de 7
+const PRAZO_CODIGO = 6 * 24 * 60 * 60 * 1000
 // A API de pedidos só existe no site publicado (Cloudflare), não no arquivo aberto direto do computador
 const API = window.location.protocol.startsWith('http')
 
@@ -268,6 +271,7 @@ export default function Checkout() {
       pedido: veioDoSite ? null : salvo.pedido || null,
       // O código só muda depois que o cliente avisa que pagou: gerar o Pix de novo mantém o mesmo pedido
       codigo: salvo.codigo || null,
+      codigoEm: salvo.codigoEm || 0,
     }
   }, [])
 
@@ -277,6 +281,7 @@ export default function Checkout() {
   const [freteId, setFreteId] = useState(inicial.freteId)
   const [pedido, setPedido] = useState(inicial.pedido)
   const [codigo, setCodigo] = useState(inicial.codigo)
+  const [codigoEm, setCodigoEm] = useState(inicial.codigoEm)
   const [tocados, setTocados] = useState({})
   const [etapa, setEtapa] = useState(() => {
     if (inicial.pedido) return 3
@@ -318,8 +323,8 @@ export default function Checkout() {
   }, [etapa, pedido])
 
   useEffect(() => {
-    guardar({ kitId, tema, form, freteId, pedido, codigo })
-  }, [kitId, tema, form, freteId, pedido, codigo])
+    guardar({ kitId, tema, form, freteId, pedido, codigo, codigoEm })
+  }, [kitId, tema, form, freteId, pedido, codigo, codigoEm])
 
   useEffect(() => {
     window.scrollTo(0, 0)
@@ -378,7 +383,9 @@ export default function Checkout() {
   }
 
   function gerarPix() {
-    const novo = codigo || novoCodigoPedido()
+    const reaproveita = codigo && Date.now() - codigoEm < PRAZO_CODIGO
+    const novo = reaproveita ? codigo : novoCodigoPedido()
+    if (!reaproveita) setCodigoEm(Date.now())
     setCodigo(novo)
     setPedido({ codigo: novo, criadoEm: Date.now() })
     enviarPedido(novo)
@@ -393,7 +400,7 @@ export default function Checkout() {
     fetch('/api/pedidos', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ codigo: codigoPedido, kitId: kit.id, tema, freteId, cliente: form }),
+      body: JSON.stringify({ codigo: codigoPedido, kitId: kit.id, tema, freteId, cliente: form, utms: utmsDoCliente() }),
       keepalive: true,
     }).catch(() => {})
   }
