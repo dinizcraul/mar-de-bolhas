@@ -28,6 +28,10 @@ export const PIX = {
 // Deixe vazio ('') para desligar. A página de pedidos nunca carrega o Pixel.
 export const PIXEL_META = '4209162972548281'
 
+// Pixel da UTMify (Integrações > Pixels no painel da UTMify): marca visitas e cliques em "Comprar"
+// e repassa para o pixel da Meta cadastrado lá. Deixe vazio ('') para desligar.
+export const PIXEL_UTMIFY = '6ad21b6c67fb5c2d84ed0c1f'
+
 // Opções de entrega mostradas no checkout. Com uma só, ela já vem marcada.
 // valor 0 aparece como "Grátis". Confira prazos e valores antes de publicar.
 export const fretes = [

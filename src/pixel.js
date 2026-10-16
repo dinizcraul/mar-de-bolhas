@@ -4,7 +4,7 @@
 //   AddToCart       ao abrir o checkout com um kit (e ao trocar de kit lá dentro)
 //   AddPaymentInfo  ao chegar na etapa de pagamento
 //   Purchase        ao gerar o Pix, uma vez por pedido (o código do pedido vai como eventID)
-import { PIXEL_META } from './data'
+import { PIXEL_META, PIXEL_UTMIFY } from './data'
 
 const COMPRAS = 'mar-de-bolhas:pixel-compras'
 
@@ -36,6 +36,18 @@ export function iniciarPixel() {
   fbq.disablePushState = true
   fbq('init', PIXEL_META)
   fbq('track', 'PageView')
+}
+
+// Mesmo script que a UTMify entrega (lá ele vem embaralhado): define window.pixelId e carrega o pixel.js.
+// Carrega depois do nosso Pixel: assim a UTMify encontra o fbq pronto e não instala outro.
+export function iniciarPixelUtmify() {
+  if (!PIXEL_UTMIFY || window.pixelId || naPaginaDePedidos()) return
+  window.pixelId = PIXEL_UTMIFY
+  const script = document.createElement('script')
+  script.src = 'https://cdn.utmify.com.br/scripts/pixel/pixel.js'
+  script.async = true
+  script.defer = true
+  document.head.appendChild(script)
 }
 
 export function evento(nome, dados, eventID) {
