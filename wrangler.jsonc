@@ -20,6 +20,9 @@
   "observability": {
     "enabled": true,
   },
+  // Mantém as variáveis cadastradas no painel do Cloudflare a cada publicação. Senhas e tokens
+  // (ADMIN_SENHA, UTMIFY_TOKEN) ficam só no painel, nunca neste arquivo, que vai para o GitHub.
+  "keep_vars": true,
   // Prévias dos pull requests (Workers Builds): usam um banco de teste, nunca os pedidos de verdade.
   "previews": {
     "d1_databases": [
