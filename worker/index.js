@@ -39,7 +39,7 @@ async function lerCorpo(request) {
 // Parâmetros utm_* do anúncio que trouxe o cliente (src/utms.js), guardados como JSON
 function lerUtms(utms) {
   if (!utms || typeof utms !== 'object') return null
-  const limpas = Object.fromEntries(CAMPOS_UTM.filter((c) => utms[c]).map((c) => [c, texto(utms[c], 250)]))
+  const limpas = Object.fromEntries(CAMPOS_UTM.filter((c) => utms[c]).map((c) => [c, texto(utms[c], 500)]))
   return Object.keys(limpas).length ? JSON.stringify(limpas) : null
 }
 
@@ -99,7 +99,8 @@ async function salvarPedido(request, env, ctx) {
      VALUES (${colunas.map(() => '?').join(', ')}, ?, ?)
      ON CONFLICT (codigo) DO UPDATE SET ${colunas
        .filter((c) => c !== 'codigo')
-       .map((c) => `${c} = excluded.${c}`)
+       // Gerar o Pix de novo sem UTMs (passou a janela de 7 dias) não apaga as do anúncio que trouxe o pedido
+       .map((c) => (c === 'utms' ? 'utms = COALESCE(excluded.utms, pedidos.utms)' : `${c} = excluded.${c}`))
        .join(', ')}, atualizado_em = excluded.atualizado_em
      WHERE pedidos.status = 'aguardando'
      RETURNING *`,
@@ -151,6 +152,9 @@ async function atualizarPedido(request, codigo, env, ctx) {
     valores.push(quando)
   }
   if (mudancas.status === 'aguardando') campos.push('pago_em = NULL')
+  // Pedido pago antes de existir a coluna pago_em: o cancelamento ainda conta como reembolso
+  if (mudancas.status === 'cancelado')
+    campos.push(`pago_em = COALESCE(pago_em, CASE WHEN status IN ('pago', 'enviado') THEN atualizado_em END)`)
   const antes = mudancas.status && (await env.DB.prepare(`SELECT * FROM pedidos WHERE codigo = ?`).bind(codigo).first())
   const pedido = await env.DB.prepare(`UPDATE pedidos SET ${campos.join(', ')}, atualizado_em = ? WHERE codigo = ? RETURNING *`)
     .bind(...valores, quando, codigo)
