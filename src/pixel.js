@@ -1,17 +1,17 @@
-// Pixel da Meta. O ID fica em PIXEL_META (src/data.js).
+// Pixel da Meta. Os IDs ficam em PIXELS_META (src/data.js) e cada evento vai para todos eles.
 // Eventos enviados:
 //   PageView        ao abrir o site
 //   AddToCart       ao abrir o checkout com um kit (e ao trocar de kit lá dentro)
 //   AddPaymentInfo  ao chegar na etapa de pagamento
 //   Purchase        ao gerar o Pix, uma vez por pedido (o código do pedido vai como eventID)
-import { PIXEL_META, PIXEL_UTMIFY } from './data'
+import { PIXELS_META, PIXEL_UTMIFY } from './data'
 
 const COMPRAS = 'mar-de-bolhas:pixel-compras'
 
 const naPaginaDePedidos = () => window.location.pathname.endsWith('/pedidos') || window.location.hash.startsWith('#admin')
 
 export function iniciarPixel() {
-  if (!PIXEL_META || window.fbq || naPaginaDePedidos()) return
+  if (!PIXELS_META.length || window.fbq || naPaginaDePedidos()) return
   // Código base da Meta, igual ao do Gerenciador de Eventos
   /* eslint-disable */
   !(function (f, b, e, v, n, t, s) {
@@ -34,7 +34,7 @@ export function iniciarPixel() {
   const fbq = window.fbq
   // As âncoras do site (#kits, #duvidas...) mudam o endereço: sem isto cada clique contaria como uma visita
   fbq.disablePushState = true
-  fbq('init', PIXEL_META)
+  PIXELS_META.forEach((id) => fbq('init', id))
   fbq('track', 'PageView')
 }
 
