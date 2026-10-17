@@ -24,9 +24,10 @@ export const PIX = {
   cidade: 'BELO HORIZONTE',
 }
 
-// Pixel da Meta (Gerenciador de Eventos): mede visitas, carrinho e compras dos anúncios.
-// Deixe vazio ('') para desligar. A página de pedidos nunca carrega o Pixel.
-export const PIXEL_META = '4209162972548281'
+// Pixels da Meta (Gerenciador de Eventos): medem visitas, carrinho e compras dos anúncios.
+// Cada evento vai para todos os pixels da lista. Deixe a lista vazia ([]) para desligar.
+// A página de pedidos nunca carrega o Pixel.
+export const PIXELS_META = ['4209162972548281', '4270642913227171']
 
 // Pixel da UTMify (Integrações > Pixels no painel da UTMify): marca visitas e cliques em "Comprar"
 // e repassa para o pixel da Meta cadastrado lá. Deixe vazio ('') para desligar.
